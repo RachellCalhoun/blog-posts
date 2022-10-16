@@ -60,6 +60,13 @@ class TestUpdate:
     def test_login_redirect(self, assert_login_redirect):
         assert_login_redirect("blog_post_create")
 
+    @pytest.mark.django_db
+    def test_non_author(self, client, user_factory, blog_post):
+        client.force_login(user_factory())
+
+        response = client.get(reverse("blog_post_delete", args=(blog_post.pk,)))
+        assert response.status_code == 403
+
 
 class TestDelete:
 
@@ -84,4 +91,4 @@ class TestDelete:
         client.force_login(user_factory())
 
         response = client.get(reverse("blog_post_delete", args=(blog_post.pk,)))
-        assert response.status_code = 403
+        assert response.status_code == 403
