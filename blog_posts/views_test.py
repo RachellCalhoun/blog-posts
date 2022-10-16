@@ -5,13 +5,28 @@ from django.urls import reverse
 from playwright.sync_api import Page
 from . models import BlogPost
 
-def test_list(page: Page, blog_post_factory):
-    post1, post2, post3 = blog_post_factory.create_batch(3)
 
-    page.goto("/")
+class TestList:
+    def test_ok(self, page: Page, blog_post_factory):
+        post1, post2, post3 = blog_post_factory.create_batch(3)
 
-    assert page.locator("h2").all_inner_texts() == [post3.name, post2.name, post1.name]
+        page.goto("/")
 
+        assert page.locator("h2").all_inner_texts() == [
+            post3.name,
+            post2.name,
+            post1.name,
+        ]
+
+    def test_filter(self, page: Page, blog_post_factory):
+        posts = blog_post_factory.create_batch(3)
+
+        page.goto("/")
+        assert page.locator("h2").count() == 3
+
+        with page.expect_navigation():
+            page.select_option("text=Author", label=str(posts[0].author))
+        assert page.locator("h2").all_inner_texts() == [posts[0].name]
 
 class TestDetail:
     def test_anon(self, page: Page, blog_post):
