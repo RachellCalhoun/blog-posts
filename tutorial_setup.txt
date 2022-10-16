@@ -5,10 +5,12 @@
 cd blog-posts/
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt 
+pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 
 python -m playwright install chromium --with-deps
 
+# use parallel tests (optional if tests are taking a lot time)
+pytest -n 4
