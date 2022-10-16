@@ -1,3 +1,4 @@
+from blog_posts.conftest import assert_login_redirect
 import pytest
 from django.urls import reverse
 from playwright.sync_api import Page
@@ -33,10 +34,8 @@ class TestCreate:
         assert blog_post.text == "I wrote some text"
         assert page.locator("h1").inner_text() == "Hello world!"
 
-    def test_login_redirect(self, client, settings):
-        url = reverse("blog_post_create")
-        response = client.get(url, follow=True)
-        assert response.redirect_chain == [(f"{settings.LOGIN_URL}?next={url}", 302)]
+    def test_login_redirect(self, assert_login_redirect):
+        assert_login_redirect("blog_post_create")
 
 
 

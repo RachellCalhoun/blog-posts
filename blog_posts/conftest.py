@@ -4,6 +4,7 @@ import pytest
 from playwright.sync_api import Browser, Page
 from pytest_factoryboy import register
 
+from django.urls import reverse
 from . import factories
 
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
@@ -40,3 +41,12 @@ def page(db, browser: Browser, live_server, client, user_factory) -> Page:
 register(factories.UserFactory)
 # Adds `blog_post` and `blog_post_factory` fixtures
 register(factories.BlogPostFactory)
+
+
+@pytest.fixture
+def assert_login_redirect(db, client, settings):
+    def inner(*args, **kwargs):
+        url = reverse(*args, **kwargs)
+        response = client.get(url, follow=True)
+        assert response.redirect_chain == [(f"{settings.LOGIN_URL}?next={url}", 302)]
+    return inner
