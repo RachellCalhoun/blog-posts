@@ -7,7 +7,7 @@ from pytest_factoryboy import register
 from . import factories
 
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
-PLAYWRIGHT_TIMEOUT = float(os.getenv("PLAYWRIGHT_TIMEOUT", "3000"))
+PLAYWRIGHT_TIMEOUT = float(os.getenv("PLAYWRIGHT_TIMEOUT", "10000"))
 
 
 @pytest.fixture

@@ -1,4 +1,5 @@
 import pytest
+from django.urls import reverse
 from playwright.sync_api import Page
 from . models import BlogPost
 
@@ -17,20 +18,25 @@ def test_detail(page: Page, blog_post):
     assert page.locator("h1").inner_text() == blog_post.name
 
 
-def test_create(page):
-    page.goto("/")
-    page.click("text=Publish")
-    page.fill("text=Name", "Hello World!")
-    page.fill("text=Text", "I wrote some text")
-    # context manager to save and reload before it continues
-    with page.expect_navigation():
-        page.click("text=Save")
+class TestCreate:
+    def test_ok(self, page: Page):
+        page.goto("/")
+        page.click("text=Publish")
+        page.fill("text=Name", "Hello world!")
+        page.fill("text=Text", "I wrote some text")
+        with page.expect_navigation():
+            page.click("text=Save")
 
-    blog_post = BlogPost.objects.get()
-    assert blog_post.author == page.user
-    assert blog_post.name == "Hello World!"
-    assert blog_post.text == "I wrote some text"
-    assert page.locator("h1").inner_text() == "Hello World!"
+        blog_post = BlogPost.objects.get()
+        assert blog_post.author == page.user
+        assert blog_post.name == "Hello world!"
+        assert blog_post.text == "I wrote some text"
+        assert page.locator("h1").inner_text() == "Hello world!"
+
+    def test_login_redirect(self, client, settings):
+        url = reverse("blog_post_create")
+        response = client.get(url, follow=True)
+        assert response.redirect_chain == [(f"{settings.LOGIN_URL}?next={url}", 302)]
 
 
 
