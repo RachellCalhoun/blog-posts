@@ -8,7 +8,7 @@ from django.urls import reverse
 from . import factories
 
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
-PLAYWRIGHT_TIMEOUT = float(os.getenv("PLAYWRIGHT_TIMEOUT", "10000"))
+PLAYWRIGHT_TIMEOUT = float(os.getenv("PLAYWRIGHT_TIMEOUT", "20000"))
 
 
 @pytest.fixture
