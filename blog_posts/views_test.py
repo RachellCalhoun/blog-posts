@@ -38,34 +38,50 @@ class TestCreate:
         assert_login_redirect("blog_post_create")
 
 
+class TestUpdate:
+
+    def test_update(self, page: Page, blog_post_factory):
+
+        blog_post = blog_post_factory(author=page.user)
+        page.goto(blog_post.get_absolute_url())
+        page.click("text=Update")
+        page.fill("text=Name", "New name")
+        page.fill("text=Text", "New text")
+        with page.expect_navigation():
+            page.click("text=Save")
 
 
-def test_update(page: Page, blog_post_factory):
-
-    blog_post = blog_post_factory(author=page.user)
-    page.goto(blog_post.get_absolute_url())
-    page.click("text=Update")
-    page.fill("text=Name", "New name")
-    page.fill("text=Text", "New text")
-    with page.expect_navigation():
-        page.click("text=Save")
-
-
-    blog_post.refresh_from_db()
-
-    assert blog_post.name == "New name"
-    assert blog_post.text == "New text"
-    assert page.locator("h1").inner_text() == "New name"
-
-def test_delete(page: Page, blog_post_factory):
-    blog_post = blog_post_factory(author=page.user)
-    
-    page.goto(blog_post.get_absolute_url())
-    page.click("text=Delete")
-    with page.expect_navigation():
-        page.click("input:text('Delete')")
-
-    with pytest.raises(BlogPost.DoesNotExist):
         blog_post.refresh_from_db()
 
-    assert page.locator("h1").inner_text() == "Blog Posts"
+        assert blog_post.name == "New name"
+        assert blog_post.text == "New text"
+        assert page.locator("h1").inner_text() == "New name"
+
+    def test_login_redirect(self, assert_login_redirect):
+        assert_login_redirect("blog_post_create")
+
+
+class TestDelete:
+
+    def test_delete(self, page: Page, blog_post_factory):
+        blog_post = blog_post_factory(author=page.user)
+
+        page.goto(blog_post.get_absolute_url())
+        page.click("text=Delete")
+        with page.expect_navigation():
+            page.click("input:text('Delete')")
+
+        with pytest.raises(BlogPost.DoesNotExist):
+            blog_post.refresh_from_db()
+
+        assert page.locator("h1").inner_text() == "Blog Posts"
+
+    def test_login_redirect(self, assert_login_redirect):
+        assert_login_redirect("blog_post_create")
+
+    @pytest.mark.django_db
+    def test_non_author(self, client, user_factory, blog_post):
+        client.force_login(user_factory())
+
+        response = client.get(reverse("blog_post_delete", args=(blog_post.pk,)))
+        assert response.status_code = 403
